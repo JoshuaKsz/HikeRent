@@ -1,0 +1,6 @@
+@HikeRent_HostAddress = http://localhost:5055
+
+GET {{HikeRent_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
