@@ -1,4 +1,52 @@
+using HikeRent.Data;
+using HikeRent.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
+
+//builder.Host.UseSerilog((ctx, config) =>
+//{
+//    config.ReadFrom.Configuration(ctx.Configuration)
+//        .WriteTo.Console()
+//        .WriteTo.File(
+//            "logs/hikerent-.txt",
+//            rollingInterval: RollingInterval.Day,
+//            outputTemplate:
+//                "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}");
+//});
+
+var connStr = builder.Configuration.GetConnectionString("HikeRent");
+builder.Services.AddDbContext<HikeRentDbContext>(opt => opt.UseNpgsql(connStr));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
 
 // Add services to the container.
 
@@ -8,6 +56,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseCors("AllowAngular");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
