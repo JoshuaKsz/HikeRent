@@ -25,7 +25,9 @@ namespace HikeRent.Middlewares
                 await ctx.Response.WriteAsJsonAsync(new
                 {
                     status = "error",
-                    message = "Terjadi kesalahan server."
+                    // debugging untuk lihat pesan error kalau ingin deploy atau pindah ke branch jangan lupa comment
+                    //message = "Terjadi kesalahan server."
+                    message = ex.Message
                 });
             }
         }
