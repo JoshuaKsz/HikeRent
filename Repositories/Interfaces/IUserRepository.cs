@@ -6,6 +6,6 @@ namespace HikeRent.Repositories.Interfaces
     {
         Task<User?> GetByEmailAsync(string email);
 
-        Task<bool> EmailExistAsync(string email);
+        Task<bool> EmailExistsAsync(string email);
     }
 }
