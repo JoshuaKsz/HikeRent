@@ -18,7 +18,7 @@ namespace HikeRent.Models
 
         [Required]
         [MaxLength(255)]
-        public string Password { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(30)]

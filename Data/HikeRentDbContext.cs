@@ -5,7 +5,7 @@ namespace HikeRent.Data
 {
     public class HikeRentDbContext : DbContext
     {
-        public HikeRentDbContext(DbContextOptions options) : base(options)
+        public HikeRentDbContext(DbContextOptions<HikeRentDbContext> options) : base(options)
         {
         }
 
