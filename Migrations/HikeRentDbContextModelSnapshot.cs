@@ -263,10 +263,8 @@ namespace HikeRent.Migrations
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasDefaultValue("Unpaid");
+                        .HasColumnType("character varying(30)");
 
                     b.Property<DateOnly>("PlannedReturnDate")
                         .HasColumnType("date");
@@ -286,10 +284,8 @@ namespace HikeRent.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
-                        .HasDefaultValue("Pending");
+                        .HasColumnType("character varying(30)");
 
                     b.Property<decimal>("TotalDamageFee")
                         .HasColumnType("decimal(12,2)");

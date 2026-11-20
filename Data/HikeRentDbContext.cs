@@ -193,11 +193,15 @@ namespace HikeRent.Data
 
             modelBuilder.Entity<Rental>()
                 .Property(r => r.Status)
-                .HasDefaultValue("Pending");
+                .HasConversion<string>()
+                .HasMaxLength(30)
+                .IsRequired();
 
             modelBuilder.Entity<Rental>()
                 .Property(r => r.PaymentStatus)
-                .HasDefaultValue("Unpaid");
+                .HasConversion<string>()
+                .HasMaxLength(30)
+                .IsRequired();
 
             modelBuilder.Entity<Payment>()
                 .Property(p => p.PaymentDate)

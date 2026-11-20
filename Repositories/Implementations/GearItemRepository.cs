@@ -1,4 +1,5 @@
 ﻿using HikeRent.Data;
+using HikeRent.Enums;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -38,5 +39,33 @@ namespace HikeRent.Repositories.Implementations
             return await _context.Brands
                 .AnyAsync(b => b.BrandId == brandId);
         }
+
+
+        public async Task<int> GetRentedStockAsync(int gearItemId)
+        {
+            return await _context.RentalDetails
+                .Where(rd =>
+                    rd.GearItemId == gearItemId &&
+                    (rd.Rental!.Status == RentalStatus.Pending ||
+                     rd.Rental.Status == RentalStatus.Ongoing))
+                .SumAsync(rd => (int?)rd.Quantity) ?? 0;
+        }
+
+        public async Task<GearItem?> GetForStockUpdateAsync(int id)
+        {
+            if (_context.Database.CurrentTransaction == null)
+            {
+                throw new InvalidOperationException(
+                    "Stock locking requires an active database transaction."
+                );
+            }
+
+            return await _dbSet
+                .FromSqlInterpolated(
+                    $"SELECT * FROM \"GearItems\" WHERE \"GearItemId\" = {id} FOR UPDATE"
+                )
+                .FirstOrDefaultAsync();
+        }
+
     }
 }

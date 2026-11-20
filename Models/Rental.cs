@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HikeRent.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HikeRent.Models
@@ -26,7 +27,7 @@ namespace HikeRent.Models
 
         [Required]
         [MaxLength(30)]
-        public string Status { get; set; } = "Pending";
+        public RentalStatus Status { get; set; } = RentalStatus.Pending;
 
         [Column(TypeName = "decimal(12,2)")]
         public decimal TotalRentalFee { get; set; }
@@ -45,7 +46,7 @@ namespace HikeRent.Models
 
         [Required]
         [MaxLength(30)]
-        public string PaymentStatus { get; set; } = "Unpaid";
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
 
         public DateTime CreatedAt { get; set; }
 

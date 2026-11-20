@@ -12,5 +12,9 @@ namespace HikeRent.Repositories.Interfaces
 
         Task<bool> BrandExistsAsync(int brandId);
 
+        Task<int> GetRentedStockAsync(int gearItemId);
+
+        Task<GearItem?> GetForStockUpdateAsync(int id);
+
     }
 }
