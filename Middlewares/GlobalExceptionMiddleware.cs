@@ -21,7 +21,7 @@ namespace HikeRent.Middlewares
             {
                 ctx.Response.ContentType = "application/json";
                 ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
+                //Console.WriteLine(ex.Message.ToString());
                 await ctx.Response.WriteAsJsonAsync(new
                 {
                     status = "error",
