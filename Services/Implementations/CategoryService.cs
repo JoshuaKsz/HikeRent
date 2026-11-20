@@ -1,4 +1,5 @@
-﻿using HikeRent.DTOs.Category;
+﻿using HikeRent.DTOs.Brands;
+using HikeRent.DTOs.Category;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
 using HikeRent.Services.Interfaces;
@@ -22,12 +23,7 @@ namespace HikeRent.Services.Implementations
         {
             IEnumerable<Category> categories = await _categoryRepository.GetAllAsync();
 
-            return categories.Select(category => new CategoryResponse
-            {
-                CategoryId = category.CategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description,
-            });
+            return categories.Select(MapToResponse);
         }
 
         public async Task<CategoryResponse?> GetByIdAsync(int id)
@@ -39,12 +35,7 @@ namespace HikeRent.Services.Implementations
                 return null;
             }
 
-            return new CategoryResponse
-            {
-                CategoryId = category.CategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description,
-            };
+            return MapToResponse(category);
         }
 
         public async Task<CategoryResponse> CreateAsync(CategoryRequest request)
@@ -68,12 +59,7 @@ namespace HikeRent.Services.Implementations
 
             await _unitOfWork.SaveChangesAsync();
 
-            return new CategoryResponse
-            {
-                CategoryId = category.CategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description
-            };
+            return MapToResponse(category);
         }
 
         public async Task<CategoryResponse?> UpdateAsync(int id, CategoryRequest request)
@@ -101,12 +87,7 @@ namespace HikeRent.Services.Implementations
 
             await _unitOfWork.SaveChangesAsync();
 
-            return new CategoryResponse
-            {
-                CategoryId = category.CategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description
-            };
+            return MapToResponse(category);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -121,5 +102,16 @@ namespace HikeRent.Services.Implementations
 
             return true;
         }
+
+        private static CategoryResponse MapToResponse(Category category)
+        {
+            return new CategoryResponse
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
+                Description = category.Description
+            };
+        }
     }
+
 }
