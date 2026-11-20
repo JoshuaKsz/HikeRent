@@ -21,7 +21,7 @@ namespace HikeRent.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var brands = await _brandService.GetAllAsync();
+            IEnumerable<BrandResponse> brands = await _brandService.GetAllAsync();
 
             return Ok(brands);
         }
@@ -29,7 +29,7 @@ namespace HikeRent.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var brand = await _brandService.GetByIdAsync(id);
+            BrandResponse? brand = await _brandService.GetByIdAsync(id);
 
             if (brand == null)
             {
@@ -48,7 +48,7 @@ namespace HikeRent.Controllers
         {
             try
             {
-                var brand = await _brandService.CreateAsync(request);
+                BrandResponse brand = await _brandService.CreateAsync(request);
 
                 return CreatedAtAction(
                     nameof(GetById),
@@ -72,7 +72,7 @@ namespace HikeRent.Controllers
         {
             try
             {
-                var brand = await _brandService.UpdateAsync(id, request);
+                BrandResponse? brand = await _brandService.UpdateAsync(id, request);
 
                 if (brand == null)
                 {
@@ -98,7 +98,7 @@ namespace HikeRent.Controllers
         {
             try
             {
-                var isDeleted = await _brandService.DeleteAsync(id);
+                bool isDeleted = await _brandService.DeleteAsync(id);
 
                 if (!isDeleted)
                 {
