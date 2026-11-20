@@ -23,7 +23,20 @@ namespace HikeRent.Services.Implementations
             IEnumerable<GearItem> gearItems =
                 await _gearItemRepository.GetAllWithDetailsAsync();
 
-            return gearItems.Select(MapToResponse);
+            var rentedStocks =
+                await _gearItemRepository.GetRentedStockByGearItemAsync(
+                    gearItems.Select(g => g.GearItemId)
+                );
+
+            return gearItems.Select(gearItem =>
+            {
+                rentedStocks.TryGetValue(
+                    gearItem.GearItemId,
+                    out int rentedStock
+                );
+
+                return MapToResponse(gearItem, rentedStock);
+            });
         }
 
         public async Task<GearItemResponse?> GetByIdAsync(int id)
@@ -36,7 +49,10 @@ namespace HikeRent.Services.Implementations
                 return null;
             }
 
-            return MapToResponse(gearItem);
+            int rentedStock =
+                await _gearItemRepository.GetRentedStockAsync(id);
+
+            return MapToResponse(gearItem, rentedStock);
         }
 
         public async Task<GearItemResponse> CreateAsync(
@@ -68,46 +84,101 @@ namespace HikeRent.Services.Implementations
             GearItem? savedGearItem =
                 await _gearItemRepository.GetByIdWithDetailsAsync(gearItem.GearItemId);
 
-            return MapToResponse(savedGearItem!);
+            int rentedStock =
+                await _gearItemRepository.GetRentedStockAsync(gearItem.GearItemId);
+
+            return MapToResponse(savedGearItem!, rentedStock);
         }
+
 
         public async Task<GearItemResponse?> UpdateAsync(
             int id,
             GearItemRequest request)
         {
-            GearItem? gearItem =
-                await _gearItemRepository.GetByIdAsync(id);
+            await _unitOfWork.BeginTransactionAsync();
 
-            if (gearItem == null)
+            try
             {
-                return null;
+                // Lock GearItem row until transaction completes.
+                GearItem? gearItem =
+                    await _gearItemRepository.GetForStockUpdateAsync(id);
+
+                if (gearItem == null)
+                {
+                    await _unitOfWork.CommitTransactionAsync();
+                    return null;
+                }
+
+                await ValidateReferencesAsync(request);
+
+                ValidateBusinessRules(request);
+
+                // Calculate rented stock using the latest committed data.
+                int rentedStock =
+                    await _gearItemRepository.GetRentedStockAsync(id);
+
+                int availableStock =
+                    request.TotalStock
+                    - request.MaintenanceStock
+                    - request.DamagedStock
+                    - rentedStock;
+
+                if (availableStock < 0)
+                {
+                    throw new InvalidOperationException(
+                        "Perubahan stok ditolak karena jumlah stok tersedia tidak boleh negatif.");
+                }
+
+                if (gearItem.IsActive && !request.IsActive)
+                {
+                    bool hasActiveRental =
+                        await _gearItemRepository.HasActiveRentalAsync(id);
+
+                    if (hasActiveRental)
+                    {
+                        throw new InvalidOperationException(
+                            "GearItem tidak dapat dinonaktifkan karena masih memiliki Rental Pending atau Ongoing."
+                        );
+                    }
+                }
+
+                // Update GearItem properties.
+                gearItem.CategoryId = request.CategoryId;
+                gearItem.BrandId = request.BrandId;
+                gearItem.GearName = request.GearName.Trim();
+                gearItem.Description = request.Description?.Trim();
+                gearItem.DailyPrice = request.DailyPrice;
+                gearItem.ReplacementPrice = request.ReplacementPrice;
+                gearItem.TotalStock = request.TotalStock;
+                gearItem.MaintenanceStock = request.MaintenanceStock;
+                gearItem.DamagedStock = request.DamagedStock;
+                gearItem.ImageUrl = request.ImageUrl?.Trim();
+                gearItem.IsActive = request.IsActive;
+
+                await _unitOfWork.SaveChangesAsync();
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                GearItem? updatedGearItem =
+                    await _gearItemRepository.GetByIdWithDetailsAsync(id);
+
+                return MapToResponse(updatedGearItem!, rentedStock);
             }
+            catch
+            {
+                try
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                }
+                catch
+                {
 
-            await ValidateReferencesAsync(request);
+                }
 
-            ValidateBusinessRules(request);
-
-            gearItem.CategoryId = request.CategoryId;
-            gearItem.BrandId = request.BrandId;
-            gearItem.GearName = request.GearName.Trim();
-            gearItem.Description = request.Description?.Trim();
-            gearItem.DailyPrice = request.DailyPrice;
-            gearItem.ReplacementPrice = request.ReplacementPrice;
-            gearItem.TotalStock = request.TotalStock;
-            gearItem.MaintenanceStock = request.MaintenanceStock;
-            gearItem.DamagedStock = request.DamagedStock;
-            gearItem.ImageUrl = request.ImageUrl?.Trim();
-            gearItem.IsActive = request.IsActive;
-
-            _gearItemRepository.Update(gearItem);
-
-            await _unitOfWork.SaveChangesAsync();
-
-            GearItem? updatedGearItem =
-                await _gearItemRepository.GetByIdWithDetailsAsync(id);
-
-            return MapToResponse(updatedGearItem!);
+                throw;
+            }
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {
@@ -117,6 +188,16 @@ namespace HikeRent.Services.Implementations
             if (gearItem == null)
             {
                 return false;
+            }
+
+            bool hasRentalHistory =
+                await _gearItemRepository.HasRentalHistoryAsync(id);
+
+            if (hasRentalHistory)
+            {
+                throw new InvalidOperationException(
+                    "GearItem tidak dapat dihapus karena sudah memiliki riwayat Rental."
+                );
             }
 
             _gearItemRepository.Delete(gearItem);
@@ -166,10 +247,17 @@ namespace HikeRent.Services.Implementations
                 throw new InvalidOperationException(
                     "Jumlah stok tidak boleh bernilai negatif.");
             }
+
+            if (request.MaintenanceStock + request.DamagedStock > request.TotalStock)
+            {
+                throw new InvalidOperationException(
+                    "Jumlah stok maintenance dan rusak tidak boleh melebihi total stok.");
+            }
         }
 
         private static GearItemResponse MapToResponse(
-            GearItem gearItem)
+            GearItem gearItem,
+            int rentedStock)
         {
             return new GearItemResponse
             {
@@ -187,9 +275,17 @@ namespace HikeRent.Services.Implementations
                 TotalStock = gearItem.TotalStock,
                 MaintenanceStock = gearItem.MaintenanceStock,
                 DamagedStock = gearItem.DamagedStock,
+                AvailableStock = CalculateAvailableStock(gearItem, rentedStock),
                 IsActive = gearItem.IsActive,
                 ImageUrl = gearItem.ImageUrl
             };
+        }
+        private static int CalculateAvailableStock(GearItem gearItem, int rentedStock)
+        {
+            return gearItem.TotalStock
+                - gearItem.MaintenanceStock
+                - gearItem.DamagedStock
+                - rentedStock;
         }
     }
 }

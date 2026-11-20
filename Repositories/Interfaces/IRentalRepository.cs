@@ -7,5 +7,7 @@ namespace HikeRent.Repositories.Interfaces
         Task<IEnumerable<Rental>> GetAllWithDetailsAsync();
 
         Task<Rental?> GetByIdWithDetailsAsync(int id);
+
+        Task<Rental?> GetByIdWithDetailsForUpdateAsync(int id);
     }
 }

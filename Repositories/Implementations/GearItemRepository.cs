@@ -51,6 +51,33 @@ namespace HikeRent.Repositories.Implementations
                 .SumAsync(rd => (int?)rd.Quantity) ?? 0;
         }
 
+        public async Task<Dictionary<int, int>> GetRentedStockByGearItemAsync(
+    IEnumerable<int> gearItemIds)
+        {
+            var ids = gearItemIds.Distinct().ToArray();
+
+            if (ids.Length == 0)
+            {
+                return new Dictionary<int, int>();
+            }
+
+            return await _context.RentalDetails
+                .Where(rd =>
+                    ids.Contains(rd.GearItemId) &&
+                    (rd.Rental!.Status == RentalStatus.Pending ||
+                     rd.Rental.Status == RentalStatus.Ongoing))
+                .GroupBy(rd => rd.GearItemId)
+                .Select(group => new
+                {
+                    GearItemId = group.Key,
+                    Quantity = group.Sum(rd => rd.Quantity)
+                })
+                .ToDictionaryAsync(
+                    x => x.GearItemId,
+                    x => x.Quantity
+                );
+        }
+
         public async Task<GearItem?> GetForStockUpdateAsync(int id)
         {
             if (_context.Database.CurrentTransaction == null)
@@ -65,6 +92,21 @@ namespace HikeRent.Repositories.Implementations
                     $"SELECT * FROM \"GearItems\" WHERE \"GearItemId\" = {id} FOR UPDATE"
                 )
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> HasRentalHistoryAsync(int gearItemId)
+        {
+            return await _context.RentalDetails
+                .AnyAsync(rd => rd.GearItemId == gearItemId);
+        }
+
+        public async Task<bool> HasActiveRentalAsync(int gearItemId)
+        {
+            return await _context.RentalDetails
+                .AnyAsync(rd =>
+                    rd.GearItemId == gearItemId &&
+                    (rd.Rental!.Status == RentalStatus.Pending ||
+                     rd.Rental.Status == RentalStatus.Ongoing));
         }
 
     }

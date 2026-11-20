@@ -32,5 +32,23 @@ namespace HikeRent.Repositories.Implementations
                     .ThenInclude(rd => rd.GearItem)
                 .FirstOrDefaultAsync(r => r.RentalId == id);
         }
+
+        public async Task<Rental?> GetByIdWithDetailsForUpdateAsync(int id)
+        {
+            if (_context.Database.CurrentTransaction == null)
+            {
+                throw new InvalidOperationException(
+                    "Rental locking requires an active database transaction."
+                );
+            }
+
+            return await _dbSet
+                .FromSqlInterpolated(
+                    $"SELECT * FROM \"Rentals\" WHERE \"RentalId\" = {id} FOR UPDATE"
+                )
+                .Include(r => r.RentalDetails)
+                    .ThenInclude(rd => rd.ReturnRecord)
+                .FirstOrDefaultAsync();
+        }
     }
 }

@@ -25,8 +25,7 @@
         public int MaintenanceStock { get; set; }
 
         public int DamagedStock { get; set; }
-        public int AvailableStock =>
-            TotalStock - MaintenanceStock - DamagedStock;
+        public int AvailableStock { get; set; }
 
         public bool IsActive { get; set; }
 

@@ -14,7 +14,12 @@ namespace HikeRent.Repositories.Interfaces
 
         Task<int> GetRentedStockAsync(int gearItemId);
 
+        Task<Dictionary<int, int>> GetRentedStockByGearItemAsync(IEnumerable<int> gearItemIds);
+
         Task<GearItem?> GetForStockUpdateAsync(int id);
 
+        Task<bool> HasRentalHistoryAsync(int gearItemId);
+
+        Task<bool> HasActiveRentalAsync(int gearItemId);
     }
 }

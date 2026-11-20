@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿
+using HikeRent.Exceptions;
+using System.Net;
 
 namespace HikeRent.Middlewares
 {
@@ -19,15 +21,36 @@ namespace HikeRent.Middlewares
             }
             catch (Exception ex)
             {
+                if (ctx.Response.HasStarted)
+                {
+                    throw;
+                }
+
+                ctx.Response.Clear();
                 ctx.Response.ContentType = "application/json";
-                ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                //Console.WriteLine(ex.Message.ToString());
+
+                var (statusCode, message) = ex switch
+                {
+                    KeyNotFoundException =>
+                        (StatusCodes.Status404NotFound, ex.Message),
+
+                    BusinessException =>
+                        (StatusCodes.Status400BadRequest, ex.Message),
+
+                    UnauthorizedAccessException =>
+                        (StatusCodes.Status401Unauthorized, "Akses tidak diizinkan."),
+
+                    _ =>
+                        (StatusCodes.Status500InternalServerError,
+                         "Terjadi kesalahan pada server.")
+                };
+
+                ctx.Response.StatusCode = statusCode;
+
                 await ctx.Response.WriteAsJsonAsync(new
                 {
                     status = "error",
-                    // debugging untuk lihat pesan error kalau ingin deploy atau pindah ke branch jangan lupa comment
-                    //message = "Terjadi kesalahan server."
-                    message = ex.Message
+                    message
                 });
             }
         }
