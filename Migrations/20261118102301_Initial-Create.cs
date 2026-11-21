@@ -245,7 +245,7 @@ namespace HikeRent.Migrations
                     LostQuantity = table.Column<int>(type: "integer", nullable: false),
                     Condition = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: true),
-                    RentalFee = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
+                    DamageFee = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
                     LateFee = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
                     LostItemFee = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
                     ActualReturnDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")

@@ -11,6 +11,7 @@ namespace HikeRent.Controllers
 {
     [ApiController]
     [Route("api/customer")]
+    [Authorize]
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -20,7 +21,6 @@ namespace HikeRent.Controllers
             this._customerService = customerService;
         }
 
-        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> GetCustomers(
             [FromQuery] string? search,

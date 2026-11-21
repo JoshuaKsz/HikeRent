@@ -82,7 +82,7 @@ namespace HikeRent.Services.Implementations
 
             await this._customerRepository.AddAsync(customer);
 
-            await _unitOfWork.SaveChangesAsync();
+            await this._unitOfWork.SaveChangesAsync();
 
             return new CustomerResponse
             {
@@ -124,7 +124,7 @@ namespace HikeRent.Services.Implementations
 
             this._customerRepository.Update(customer);
 
-            await _unitOfWork.SaveChangesAsync();
+            await this._unitOfWork.SaveChangesAsync();
 
             return new CustomerResponse
             {

@@ -20,17 +20,13 @@ namespace HikeRent.Models
 
         public int LostQuantity { get; set; } = 0;
 
-        [Required]
-        [MaxLength(50)]
-        public string Condition { get; set; } = string.Empty;
-
         public string? Notes { get; set; }
 
         [Column(TypeName = "decimal(12,2)")]
-        public decimal RentalFee { get; set; }
+        public decimal LateFee { get; set; }
 
         [Column(TypeName = "decimal(12,2)")]
-        public decimal LateFee { get; set; }
+        public decimal DamageFee { get; set; }
 
         [Column(TypeName = "decimal(12,2)")]
         public decimal LostItemFee { get; set; }

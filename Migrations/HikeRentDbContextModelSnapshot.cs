@@ -366,10 +366,8 @@ namespace HikeRent.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<string>("Condition")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<decimal>("DamageFee")
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<int>("DamagedQuantity")
                         .HasColumnType("integer");
@@ -391,9 +389,6 @@ namespace HikeRent.Migrations
 
                     b.Property<int>("RentalDetailId")
                         .HasColumnType("integer");
-
-                    b.Property<decimal>("RentalFee")
-                        .HasColumnType("decimal(12,2)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");

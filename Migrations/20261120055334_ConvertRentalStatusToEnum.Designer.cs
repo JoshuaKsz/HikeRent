@@ -395,7 +395,7 @@ namespace HikeRent.Migrations
                     b.Property<int>("RentalDetailId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("RentalFee")
+                    b.Property<decimal>("DamageFee")
                         .HasColumnType("decimal(12,2)");
 
                     b.Property<int>("UserId")
