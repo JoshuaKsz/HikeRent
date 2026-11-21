@@ -1,4 +1,5 @@
 ﻿using HikeRent.Data;
+using HikeRent.Enums;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,20 @@ namespace HikeRent.Repositories.Implementations
                 .Include(r => r.RentalDetails)
                     .ThenInclude(rd => rd.GearItem)
                 .FirstOrDefaultAsync(r => r.RentalId == id);
+        }
+
+        public async Task<IEnumerable<Rental>> GetReturnedUnpaidAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(r => r.Customer)
+                .Include(r => r.RentalDetails)
+                    .ThenInclude(rd => rd.GearItem)
+                .Where(r =>
+                    r.Status == RentalStatus.Returned &&
+                    r.PaymentStatus == PaymentStatus.Unpaid)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
         }
 
         public async Task<Rental?> GetByIdWithDetailsForUpdateAsync(int id)

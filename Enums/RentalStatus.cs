@@ -2,9 +2,8 @@
 {
     public enum RentalStatus
     {
-        Pending = 1,
-        Ongoing = 2,
-        Completed = 3,
-        Cancelled = 4
+        Ongoing = 1,
+        Returned = 2,
+        Completed = 3
     }
 }

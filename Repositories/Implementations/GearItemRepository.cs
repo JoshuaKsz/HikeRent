@@ -46,8 +46,7 @@ namespace HikeRent.Repositories.Implementations
             return await _context.RentalDetails
                 .Where(rd =>
                     rd.GearItemId == gearItemId &&
-                    (rd.Rental!.Status == RentalStatus.Pending ||
-                     rd.Rental.Status == RentalStatus.Ongoing))
+                    rd.Rental!.Status == RentalStatus.Ongoing)
                 .SumAsync(rd => (int?)rd.Quantity) ?? 0;
         }
 
@@ -64,8 +63,7 @@ namespace HikeRent.Repositories.Implementations
             return await _context.RentalDetails
                 .Where(rd =>
                     ids.Contains(rd.GearItemId) &&
-                    (rd.Rental!.Status == RentalStatus.Pending ||
-                     rd.Rental.Status == RentalStatus.Ongoing))
+                    rd.Rental!.Status == RentalStatus.Ongoing)
                 .GroupBy(rd => rd.GearItemId)
                 .Select(group => new
                 {
@@ -105,8 +103,7 @@ namespace HikeRent.Repositories.Implementations
             return await _context.RentalDetails
                 .AnyAsync(rd =>
                     rd.GearItemId == gearItemId &&
-                    (rd.Rental!.Status == RentalStatus.Pending ||
-                     rd.Rental.Status == RentalStatus.Ongoing));
+                    rd.Rental!.Status == RentalStatus.Ongoing);
         }
 
     }

@@ -8,6 +8,8 @@ namespace HikeRent.Repositories.Interfaces
 
         Task<Rental?> GetByIdWithDetailsAsync(int id);
 
+        Task<IEnumerable<Rental>> GetReturnedUnpaidAsync();
+
         Task<Rental?> GetByIdWithDetailsForUpdateAsync(int id);
     }
 }

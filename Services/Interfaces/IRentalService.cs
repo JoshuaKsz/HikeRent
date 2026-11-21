@@ -8,10 +8,8 @@ namespace HikeRent.Services.Interfaces
 
         Task<RentalResponse?> GetByIdAsync(int id);
 
+        Task<IEnumerable<RentalResponse>> GetReturnedUnpaidAsync();
+
         Task<RentalResponse> CreateAsync(RentalRequest request);
-
-        Task<RentalResponse?> UpdateStatusAsync(int id, string status);
-
-        Task<bool> CancelAsync(int id);
     }
 }

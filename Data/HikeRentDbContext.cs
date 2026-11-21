@@ -207,6 +207,12 @@ namespace HikeRent.Data
                 .Property(p => p.PaymentDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.PaymentMethod)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .IsRequired();
+
             modelBuilder.Entity<ReturnRecord>()
                 .Property(r => r.ActualReturnDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");

@@ -27,7 +27,7 @@ namespace HikeRent.Models
 
         [Required]
         [MaxLength(30)]
-        public RentalStatus Status { get; set; } = RentalStatus.Pending;
+        public RentalStatus Status { get; set; } = RentalStatus.Ongoing;
 
         [Column(TypeName = "decimal(12,2)")]
         public decimal TotalRentalFee { get; set; }

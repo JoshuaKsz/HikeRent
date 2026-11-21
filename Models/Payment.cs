@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HikeRent.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HikeRent.Models
@@ -23,7 +24,7 @@ namespace HikeRent.Models
 
         [Required]
         [MaxLength(50)]
-        public string PaymentMethod { get; set; } = string.Empty;
+        public PaymentMethod PaymentMethod { get; set; }
 
         public DateTime PaymentDate { get; set; }
 

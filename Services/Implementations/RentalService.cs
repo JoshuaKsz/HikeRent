@@ -12,6 +12,7 @@ namespace HikeRent.Services.Implementations
         private readonly IRentalRepository _rentalRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IGearItemRepository _gearItemRepository;
+        private readonly IPricingService _pricingService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -22,12 +23,14 @@ namespace HikeRent.Services.Implementations
             IRentalRepository rentalRepository,
             ICustomerRepository customerRepository,
             IGearItemRepository gearItemRepository,
+            IPricingService pricingService,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor)
         {
             _rentalRepository = rentalRepository;
             _customerRepository = customerRepository;
             _gearItemRepository = gearItemRepository;
+            _pricingService = pricingService;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -81,30 +84,11 @@ namespace HikeRent.Services.Implementations
                 rentalDateUtc,
                 JakartaTimeZone);
 
-            // Menghitung tanggal mulai efektif
-            DateOnly effectiveStartDate =
-                rentalLocalTime.TimeOfDay >= new TimeSpan(12, 0, 0)
-                    ? DateOnly.FromDateTime(rentalLocalTime).AddDays(1)
-                    : DateOnly.FromDateTime(rentalLocalTime);
-
-            // Validasi tanggal Rental
-            if (request.PlannedReturnDate < request.PlannedStartDate)
-            {
-                throw new InvalidOperationException(
-                    "Tanggal pengembalian tidak boleh sebelum tanggal mulai sewa.");
-            }
-
-            if (request.PlannedStartDate != effectiveStartDate)
-            {
-                throw new InvalidOperationException(
-                    $"Tanggal mulai sewa harus {effectiveStartDate:dd-MM-yyyy} " +
-                    "sesuai waktu transaksi dan aturan cut-off pukul 12.00 WIB.");
-            }
-
-            int rentalDays = Math.Max(
-                1,
-                request.PlannedReturnDate.DayNumber -
-                effectiveStartDate.DayNumber + 1
+            // Hitung durasi dan validasi tanggal via PricingService
+            int rentalDays = _pricingService.CalculateRentalDays(
+                rentalLocalTime,
+                request.PlannedStartDate,
+                request.PlannedReturnDate
             );
 
             bool transactionStarted = false;
@@ -158,10 +142,12 @@ namespace HikeRent.Services.Implementations
                             $"Stok tersedia: {availableStock}.");
                     }
 
-                    decimal subtotal =
-                        detail.Quantity *
-                        gearItem.DailyPrice *
-                        rentalDays;
+                    // Hitung subtotal via PricingService dengan aturan bertingkat
+                    decimal subtotal = _pricingService.CalculateSubtotal(
+                        detail.Quantity,
+                        gearItem.DailyPrice,
+                        rentalDays
+                    );
 
                     totalRentalFee += subtotal;
 
@@ -194,7 +180,7 @@ namespace HikeRent.Services.Implementations
                     PlannedStartDate = request.PlannedStartDate,
                     PlannedReturnDate = request.PlannedReturnDate,
 
-                    Status = RentalStatus.Pending,
+                    Status = RentalStatus.Ongoing,
                     PaymentStatus = PaymentStatus.Unpaid,
 
                     TotalRentalFee = totalRentalFee,
@@ -265,39 +251,7 @@ namespace HikeRent.Services.Implementations
         {
             IEnumerable<Rental> rentals = await _rentalRepository.GetAllWithDetailsAsync();
 
-            return rentals.Select(r => new RentalResponse
-            {
-                RentalId = r.RentalId,
-                CustomerId = r.CustomerId,
-                CustomerName = r.Customer?.FullName ?? string.Empty,
-                RentalCode = r.RentalCode,
-                RentalDate = r.RentalDate,
-                PlannedStartDate = r.PlannedStartDate,
-                PlannedReturnDate = r.PlannedReturnDate,
-                Status = r.Status.ToString(),
-
-                TotalRentalFee = r.TotalRentalFee,
-                TotalLateFee = r.TotalLateFee,
-                TotalDamageFee = r.TotalDamageFee,
-                TotalLostItemFee = r.TotalLostItemFee,
-                GrandTotal = r.GrandTotal,
-
-                PaymentStatus = r.PaymentStatus.ToString(),
-                CreatedAt = r.CreatedAt,
-
-                Details = r.RentalDetails.Select(rd =>
-                    new RentalDetailResponse
-                    {
-                        RentalDetailId = rd.RentalDetailId,
-                        GearItemId = rd.GearItemId,
-                        GearName = rd.GearItem?.GearName ?? string.Empty,
-                        Quantity = rd.Quantity,
-                        DailyPrice = rd.DailyPrice,
-                        ReplacementPrice = rd.ReplacementPrice,
-                        RentalDays = rd.RentalDays,
-                        Subtotal = rd.Subtotal
-                    }).ToList()
-            }).ToList();
+            return rentals.Select(MapToResponse).ToList();
         }
 
         public async Task<RentalResponse?> GetByIdAsync(int id)
@@ -309,6 +263,19 @@ namespace HikeRent.Services.Implementations
                 return null;
             }
 
+            return MapToResponse(rental);
+        }
+
+        public async Task<IEnumerable<RentalResponse>> GetReturnedUnpaidAsync()
+        {
+            IEnumerable<Rental> rentals = await _rentalRepository
+                .GetReturnedUnpaidAsync();
+
+            return rentals.Select(MapToResponse).ToList();
+        }
+
+        private static RentalResponse MapToResponse(Rental rental)
+        {
             return new RentalResponse
             {
                 RentalId = rental.RentalId,
@@ -342,157 +309,6 @@ namespace HikeRent.Services.Implementations
                         Subtotal = rd.Subtotal
                     }).ToList()
             };
-        }
-
-        public async Task<RentalResponse?> UpdateStatusAsync(int id, string status)
-        {
-            // Validasi status yang dikirim
-            bool isValidStatus = Enum.TryParse(
-                status,
-                true,
-                out RentalStatus newStatus
-            );
-
-            if (!isValidStatus ||
-                !Enum.IsDefined(typeof(RentalStatus), newStatus) ||
-                !string.Equals(
-                    status?.Trim(),
-                    newStatus.ToString(),
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException(
-                    "Status Rental tidak valid."
-                );
-            }
-
-            bool transactionStarted = false;
-
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync();
-                transactionStarted = true;
-
-                // Mengambil Rental dengan tracking
-                Rental? rental = await _rentalRepository
-                    .GetByIdWithDetailsForUpdateAsync(id);
-
-                if (rental == null)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    transactionStarted = false;
-
-                    return null;
-                }
-
-                // Validasi transisi status
-                if (rental.Status == RentalStatus.Pending &&
-                    newStatus == RentalStatus.Ongoing)
-                {
-                    rental.Status = RentalStatus.Ongoing;
-                }
-                else if (rental.Status == RentalStatus.Ongoing &&
-                         newStatus == RentalStatus.Completed)
-                {
-                    // Memastikan Rental memiliki detail
-                    if (rental.RentalDetails.Count == 0)
-                    {
-                        throw new InvalidOperationException(
-                            "Rental tidak memiliki detail peralatan."
-                        );
-                    }
-
-                    // Memastikan seluruh peralatan sudah dikembalikan
-                    bool allReturned = rental.RentalDetails.All(rd =>
-                        rd.ReturnRecord != null &&
-                        rd.ReturnRecord.QuantityReturned +
-                        rd.ReturnRecord.LostQuantity == rd.Quantity &&
-                        rd.ReturnRecord.DamagedQuantity <=
-                        rd.ReturnRecord.QuantityReturned
-                    );
-
-                    if (!allReturned)
-                    {
-                        throw new InvalidOperationException(
-                            "Rental tidak dapat diselesaikan karena masih ada peralatan yang belum dikembalikan sepenuhnya."
-                        );
-                    }
-
-                    rental.Status = RentalStatus.Completed;
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Perubahan status dari {rental.Status} " +
-                        $"menjadi {newStatus} tidak diizinkan."
-                    );
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-
-                await _unitOfWork.CommitTransactionAsync();
-                transactionStarted = false;
-
-                // Mengambil kembali Rental untuk response
-                return await GetByIdAsync(id);
-            }
-            catch
-            {
-                if (transactionStarted)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                }
-
-                throw;
-            }
-        }
-        public async Task<bool> CancelAsync(int id)
-        {
-            bool transactionStarted = false;
-
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync();
-                transactionStarted = true;
-
-                // Mengambil Rental dengan tracking
-                Rental? rental = await _rentalRepository
-                    .GetByIdWithDetailsForUpdateAsync(id);
-
-                if (rental == null)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    transactionStarted = false;
-
-                    return false;
-                }
-
-                // Hanya Rental Pending yang boleh dibatalkan
-                if (rental.Status != RentalStatus.Pending)
-                {
-                    throw new InvalidOperationException(
-                        "Hanya Rental dengan status Pending yang dapat dibatalkan."
-                    );
-                }
-
-                // Mengubah status Rental
-                rental.Status = RentalStatus.Cancelled;
-
-                await _unitOfWork.SaveChangesAsync();
-
-                await _unitOfWork.CommitTransactionAsync();
-                transactionStarted = false;
-
-                return true;
-            }
-            catch
-            {
-                if (transactionStarted)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                }
-
-                throw;
-            }
         }
     }
 }
