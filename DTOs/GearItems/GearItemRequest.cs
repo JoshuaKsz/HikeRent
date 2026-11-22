@@ -16,10 +16,10 @@ namespace HikeRent.DTOs.GearItems
 
         public string? Description { get; set; }
 
-        [Range(typeof(decimal), "0.01", "9999999999.99")]
+        [Range(0.01, 9999999999.99)]
         public decimal DailyPrice { get; set; }
 
-        [Range(typeof(decimal), "0.01", "9999999999.99")]
+        [Range(0.01, 9999999999.99)]
         public decimal ReplacementPrice { get; set; }
 
         [Range(0, int.MaxValue)]
