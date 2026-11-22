@@ -1,3 +1,4 @@
+using HikeRent.Exceptions;
 ﻿using HikeRent.DTOs.Brands;
 using HikeRent.DTOs.Category;
 using HikeRent.Models;
@@ -46,7 +47,7 @@ namespace HikeRent.Services.Implementations
 
             if (existingCategory)
             {
-                throw new InvalidOperationException("Nama kategori sudah digunakan.");
+                throw new BusinessException("Nama kategori sudah digunakan.");
             }
 
             Category category = new Category
@@ -77,7 +78,7 @@ namespace HikeRent.Services.Implementations
 
             if (existingCategory != null && existingCategory.CategoryId != id)
             {
-                throw new InvalidOperationException("Nama kategori sudah digunakan.");
+                throw new BusinessException("Nama kategori sudah digunakan.");
             }
 
             category.CategoryName = categoryName;

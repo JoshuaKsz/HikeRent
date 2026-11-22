@@ -1,8 +1,10 @@
+using HikeRent.Exceptions;
 using HikeRent.DTOs.Payments;
 using HikeRent.Enums;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
 using HikeRent.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace HikeRent.Services.Implementations
@@ -13,6 +15,7 @@ namespace HikeRent.Services.Implementations
         private readonly IRentalRepository _rentalRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<PaymentService> _logger;
 
         private static readonly TimeZoneInfo JakartaTimeZone =
             TimeZoneInfo.FindSystemTimeZoneById("Asia/Jakarta");
@@ -21,12 +24,14 @@ namespace HikeRent.Services.Implementations
             IPaymentRepository paymentRepository,
             IRentalRepository rentalRepository,
             IUnitOfWork unitOfWork,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<PaymentService> logger)
         {
             _paymentRepository = paymentRepository;
             _rentalRepository = rentalRepository;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<PaymentResponse>> GetAllAsync()
@@ -59,12 +64,12 @@ namespace HikeRent.Services.Implementations
 
             if (!int.TryParse(userIdClaim, out int userId))
             {
-                throw new InvalidOperationException("User ID tidak valid.");
+                throw new BusinessException("User ID tidak valid.");
             }
 
             if (!Enum.IsDefined(typeof(PaymentMethod), request.PaymentMethod))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Metode pembayaran tidak valid.");
             }
 
@@ -88,14 +93,14 @@ namespace HikeRent.Services.Implementations
 
                 if (rental.Status != RentalStatus.Returned)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Pembayaran hanya dapat dilakukan untuk Rental " +
                         "dengan status Returned.");
                 }
 
                 if (rental.PaymentStatus == PaymentStatus.Paid)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Rental ini sudah dibayar.");
                 }
 
@@ -104,13 +109,13 @@ namespace HikeRent.Services.Implementations
 
                 if (existingPayment != null)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Rental ini sudah memiliki data pembayaran.");
                 }
 
                 if (rental.GrandTotal <= 0)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Grand Total Rental tidak valid untuk dibayar.");
                 }
 
@@ -145,12 +150,14 @@ namespace HikeRent.Services.Implementations
                 await _unitOfWork.CommitTransactionAsync();
                 transactionStarted = false;
 
+                _logger.LogInformation("Pembayaran {PaymentCode} untuk Rental {RentalId} berhasil", payment.PaymentCode, rental.RentalId);
+
                 Payment? savedPayment = await _paymentRepository
                     .GetByRentalIdWithDetailsAsync(rentalId);
 
                 if (savedPayment == null)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Data pembayaran gagal disimpan.");
                 }
 

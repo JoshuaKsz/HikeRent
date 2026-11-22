@@ -28,8 +28,6 @@ namespace HikeRent.Models
 
         public int TotalStock { get; set; } = 0;
 
-        public int MaintenanceStock { get; set; } = 0;
-
         public int DamagedStock { get; set; } = 0;
 
         [MaxLength(500)]

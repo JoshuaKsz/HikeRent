@@ -5,6 +5,9 @@ namespace HikeRent.DTOs.ReturnRecord
     public class ReturnRecordRequest
     {
         [Required]
+        public int RentalId { get; set; }
+
+        [Required]
         public int RentalDetailId { get; set; }
 
         //public int UserId { get; set; }

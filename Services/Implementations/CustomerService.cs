@@ -1,3 +1,4 @@
+using HikeRent.Exceptions;
 ﻿using HikeRent.DTOs.Category;
 using HikeRent.DTOs.Customer;
 using HikeRent.Models;
@@ -66,7 +67,7 @@ namespace HikeRent.Services.Implementations
 
             if (existingIdentity)
             {
-                throw new InvalidOperationException("NIK sudah digunakan.");
+                throw new BusinessException("NIK sudah digunakan.");
             }
 
             Customer customer = new Customer
@@ -111,7 +112,7 @@ namespace HikeRent.Services.Implementations
 
             if (existingCustomer != null && existingCustomer.CustomerId != id)
             {
-                throw new InvalidOperationException("NIK sudah digunakan.");
+                throw new BusinessException("NIK sudah digunakan.");
             }
 
 

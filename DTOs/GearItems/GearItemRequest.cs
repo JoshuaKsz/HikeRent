@@ -26,9 +26,6 @@ namespace HikeRent.DTOs.GearItems
         public int TotalStock { get; set; }
 
         [Range(0, int.MaxValue)]
-        public int MaintenanceStock { get; set; }
-
-        [Range(0, int.MaxValue)]
         public int DamagedStock { get; set; }
 
         [StringLength(500)]

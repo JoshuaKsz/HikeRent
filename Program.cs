@@ -13,18 +13,20 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Host.UseSerilog((ctx, config) =>
-//{
-//    config.ReadFrom.Configuration(ctx.Configuration)
-//        .WriteTo.Console()
-//        .WriteTo.File(
-//            "logs/hikerent-.txt",
-//            rollingInterval: RollingInterval.Day,
-//            outputTemplate:
-//                "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}");
-//});
+builder.Host.UseSerilog((ctx, config) =>
+{
+    config.ReadFrom.Configuration(ctx.Configuration)
+        .WriteTo.Console()
+        .WriteTo.File(
+            "logs/hikerent-.txt",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate:
+                "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}");
+});
 
 var connStr = builder.Configuration.GetConnectionString("HikeRent");
 builder.Services.AddDbContext<HikeRentDbContext>(opt => opt.UseNpgsql(connStr));

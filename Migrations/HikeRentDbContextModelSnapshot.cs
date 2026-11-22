@@ -175,11 +175,6 @@ namespace HikeRent.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
-                    b.Property<int>("MaintenanceStock")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
                     b.Property<decimal>("ReplacementPrice")
                         .HasColumnType("decimal(12,2)");
 

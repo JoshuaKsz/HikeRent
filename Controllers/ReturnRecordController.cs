@@ -11,7 +11,7 @@ namespace HikeRent.Controllers
 {
     [ApiController]
     [Route("api/ReturnDetail/")]
-    //[Authorize]
+    [Authorize]
     public class ReturnRecordController : ControllerBase
     {
         private readonly IReturnRecordService _returnRecordService;
@@ -55,23 +55,13 @@ namespace HikeRent.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ReturnRecordRequest request)
         {
-            try
-            {
-                var returnRecord = await _returnRecordService.CreateAsync(request);
+            var returnRecord = await _returnRecordService.CreateAsync(request);
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = returnRecord.ReturnRecordId },
-                    returnRecord
-                );
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new
-                {
-                    message = ex.Message,
-                });
-            }
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = returnRecord.ReturnRecordId },
+                returnRecord
+            );
         }
 
 

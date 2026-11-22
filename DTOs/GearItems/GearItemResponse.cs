@@ -22,7 +22,6 @@
 
         public int TotalStock { get; set; }
 
-        public int MaintenanceStock { get; set; }
 
         public int DamagedStock { get; set; }
         public int AvailableStock { get; set; }

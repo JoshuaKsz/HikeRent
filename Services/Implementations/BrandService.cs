@@ -1,3 +1,4 @@
+using HikeRent.Exceptions;
 ﻿using HikeRent.DTOs.Brands;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
@@ -43,7 +44,7 @@ namespace HikeRent.Services.Implementations
 
             if (await _brandRepository.BrandNameExistsAsync(brandName))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Brand name already exists.");
             }
 
@@ -81,7 +82,7 @@ namespace HikeRent.Services.Implementations
             if (isNameChanged &&
                 await _brandRepository.BrandNameExistsAsync(brandName))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Brand name already exists.");
             }
 

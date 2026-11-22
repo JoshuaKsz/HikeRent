@@ -1,3 +1,4 @@
+using HikeRent.Exceptions;
 ﻿using HikeRent.DTOs.GearItems;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
@@ -71,7 +72,6 @@ namespace HikeRent.Services.Implementations
                 DailyPrice = request.DailyPrice,
                 ReplacementPrice = request.ReplacementPrice,
                 TotalStock = request.TotalStock,
-                MaintenanceStock = request.MaintenanceStock,
                 DamagedStock = request.DamagedStock,
                 ImageUrl = request.ImageUrl?.Trim(),
                 IsActive = request.IsActive
@@ -119,13 +119,12 @@ namespace HikeRent.Services.Implementations
 
                 int availableStock =
                     request.TotalStock
-                    - request.MaintenanceStock
                     - request.DamagedStock
                     - rentedStock;
 
                 if (availableStock < 0)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Perubahan stok ditolak karena jumlah stok tersedia tidak boleh negatif.");
                 }
 
@@ -136,7 +135,7 @@ namespace HikeRent.Services.Implementations
 
                     if (hasActiveRental)
                     {
-                        throw new InvalidOperationException(
+                        throw new BusinessException(
                             "GearItem tidak dapat dinonaktifkan karena masih memiliki Rental Pending atau Ongoing."
                         );
                     }
@@ -150,7 +149,6 @@ namespace HikeRent.Services.Implementations
                 gearItem.DailyPrice = request.DailyPrice;
                 gearItem.ReplacementPrice = request.ReplacementPrice;
                 gearItem.TotalStock = request.TotalStock;
-                gearItem.MaintenanceStock = request.MaintenanceStock;
                 gearItem.DamagedStock = request.DamagedStock;
                 gearItem.ImageUrl = request.ImageUrl?.Trim();
                 gearItem.IsActive = request.IsActive;
@@ -195,7 +193,7 @@ namespace HikeRent.Services.Implementations
 
             if (hasRentalHistory)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "GearItem tidak dapat dihapus karena sudah memiliki riwayat Rental."
                 );
             }
@@ -213,14 +211,14 @@ namespace HikeRent.Services.Implementations
             if (!await _gearItemRepository.CategoryExistsAsync(
                 request.CategoryId))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Kategori yang dipilih tidak ditemukan.");
             }
 
             if (!await _gearItemRepository.BrandExistsAsync(
                 request.BrandId))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Brand yang dipilih tidak ditemukan.");
             }
         }
@@ -230,28 +228,27 @@ namespace HikeRent.Services.Implementations
         {
             if (request.DailyPrice <= 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Harga sewa per hari harus lebih besar dari nol.");
             }
 
             if (request.ReplacementPrice <= 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Harga penggantian harus lebih besar dari nol.");
             }
 
             if (request.TotalStock < 0 ||
-                request.MaintenanceStock < 0 ||
                 request.DamagedStock < 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Jumlah stok tidak boleh bernilai negatif.");
             }
 
-            if (request.MaintenanceStock + request.DamagedStock > request.TotalStock)
+            if (request.DamagedStock > request.TotalStock)
             {
-                throw new InvalidOperationException(
-                    "Jumlah stok maintenance dan rusak tidak boleh melebihi total stok.");
+                throw new BusinessException(
+                    "Jumlah stok rusak tidak boleh melebihi total stok.");
             }
         }
 
@@ -273,7 +270,6 @@ namespace HikeRent.Services.Implementations
                 DailyPrice = gearItem.DailyPrice,
                 ReplacementPrice = gearItem.ReplacementPrice,
                 TotalStock = gearItem.TotalStock,
-                MaintenanceStock = gearItem.MaintenanceStock,
                 DamagedStock = gearItem.DamagedStock,
                 AvailableStock = CalculateAvailableStock(gearItem, rentedStock),
                 IsActive = gearItem.IsActive,
@@ -283,7 +279,6 @@ namespace HikeRent.Services.Implementations
         private static int CalculateAvailableStock(GearItem gearItem, int rentedStock)
         {
             return gearItem.TotalStock
-                - gearItem.MaintenanceStock
                 - gearItem.DamagedStock
                 - rentedStock;
         }

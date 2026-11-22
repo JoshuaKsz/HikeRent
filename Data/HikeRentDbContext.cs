@@ -172,10 +172,6 @@ namespace HikeRent.Data
                 .HasDefaultValue(0);
 
             modelBuilder.Entity<GearItem>()
-                .Property(g => g.MaintenanceStock)
-                .HasDefaultValue(0);
-
-            modelBuilder.Entity<GearItem>()
                 .Property(g => g.DamagedStock)
                 .HasDefaultValue(0);
 

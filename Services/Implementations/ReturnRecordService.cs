@@ -1,3 +1,4 @@
+using HikeRent.Exceptions;
 ﻿using HikeRent.DTOs.Customer;
 using HikeRent.DTOs.Rentals;
 using HikeRent.DTOs.ReturnRecord;
@@ -5,6 +6,7 @@ using HikeRent.Models;
 using HikeRent.Repositories.Implementations;
 using HikeRent.Repositories.Interfaces;
 using HikeRent.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace HikeRent.Services.Implementations
@@ -16,6 +18,7 @@ namespace HikeRent.Services.Implementations
         private readonly IGearItemRepository _gearItemRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<ReturnRecordService> _logger;
 
         private static readonly TimeZoneInfo JakartaTimeZone =
             TimeZoneInfo.FindSystemTimeZoneById("Asia/Jakarta");
@@ -25,13 +28,15 @@ namespace HikeRent.Services.Implementations
             IRentalRepository rentalRepository,
             IGearItemRepository gearItemRepository,
             IUnitOfWork unitOfWork,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<ReturnRecordService> logger)
         {
             _returnRecordRepository = returnRecordRepository;
             _rentalRepository = rentalRepository;
             _gearItemRepository = gearItemRepository;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<ReturnRecordResponse> CreateAsync(
@@ -43,14 +48,14 @@ namespace HikeRent.Services.Implementations
 
             if (!int.TryParse(userIdClaim, out int userId))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "User ID tidak valid.");
             }
 
             // Validasi RentalDetail
             if (request.RentalDetailId <= 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "RentalDetailId tidak valid.");
             }
 
@@ -58,7 +63,7 @@ namespace HikeRent.Services.Implementations
                 request.DamagedQuantity < 0 ||
                 request.LostQuantity < 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Jumlah barang tidak boleh negatif.");
             }
 
@@ -66,11 +71,13 @@ namespace HikeRent.Services.Implementations
                 request.DamagedQuantity == 0 &&
                 request.LostQuantity == 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Minimal harus ada satu barang yang dikembalikan, rusak, atau hilang.");
             }
 
-            DateTime returnDateUtc = DateTime.UtcNow;
+            DateTime returnDateUtc = request.ActualReturnDate != default
+                ? request.ActualReturnDate.ToUniversalTime()
+                : DateTime.UtcNow;
 
             DateTime returnLocalTime = TimeZoneInfo.ConvertTimeFromUtc(
                 returnDateUtc,
@@ -85,7 +92,7 @@ namespace HikeRent.Services.Implementations
 
                 // Mengambil Rental beserta seluruh RentalDetail
                 Rental? rental = await _rentalRepository
-                    .GetByIdWithDetailsForUpdateAsync(request.RentalDetailId);
+                    .GetByIdWithDetailsForUpdateAsync(request.RentalId);
 
                 if (rental == null)
                 {
@@ -106,14 +113,14 @@ namespace HikeRent.Services.Implementations
                 // Validasi status rental
                 if (rental.Status != Enums.RentalStatus.Ongoing)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Rental tidak dalam status ongoing.");
                 }
 
                 // Validasi apakah detail sudah dikembalikan
                 if (rentalDetail.ReturnRecord != null)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         "Peralatan ini sudah memiliki data pengembalian.");
                 }
 
@@ -125,7 +132,7 @@ namespace HikeRent.Services.Implementations
 
                 if (totalProcessed != rentalDetail.Quantity)
                 {
-                    throw new InvalidOperationException(
+                    throw new BusinessException(
                         $"Total barang yang diproses harus sama dengan jumlah sewa ({rentalDetail.Quantity}).");
                 }
 
@@ -226,7 +233,6 @@ namespace HikeRent.Services.Implementations
                 rentalDetail.ReturnRecord = returnRecord;
 
                 // UPDATE STOK GEAR ITEM
-                gearItem.MaintenanceStock += request.DamagedQuantity;
                 gearItem.DamagedStock += request.DamagedQuantity;
                 gearItem.TotalStock -= request.LostQuantity;
 
@@ -250,18 +256,20 @@ namespace HikeRent.Services.Implementations
                     rental.Status = Enums.RentalStatus.Returned;
                 }
 
-                // 8. SIMPAN SEMUA PERUBAHAN SEKALI SAJA
+                // SIMPAN SEMUA PERUBAHAN SEKALI SAJA
                 await _unitOfWork.SaveChangesAsync();
 
                 await _unitOfWork.CommitTransactionAsync();
                 transactionStarted = false;
+
+                _logger.LogInformation("ReturnRecord dibuat untuk RentalDetailId {DetailId} oleh User {UserId}", rentalDetail.RentalDetailId, userId);
 
                 // RETURN RESPONSE
                 return new ReturnRecordResponse
                 {
                     ReturnRecordId = returnRecord.ReturnRecordId,
 
-                    UserId = userId,
+                    UserId = returnRecord.UserId,
 
                     QuantityReturned = returnRecord.QuantityReturned,
                     DamagedQuantity = returnRecord.DamagedQuantity,
@@ -290,17 +298,12 @@ namespace HikeRent.Services.Implementations
         {
             IEnumerable<ReturnRecord> returnRecords = await this._returnRecordRepository.GetAllAsync();
 
-            int userId = int.TryParse(
-                _httpContextAccessor.HttpContext?
-                    .User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id)
-                    ? id
-                    : 0;
             return returnRecords.Select(returnRecord => new ReturnRecordResponse
             {
                 ReturnRecordId = returnRecord.ReturnRecordId,
                 //RentalDetailId = returnRecord.RentalDetailId,
 
-                UserId = userId,
+                UserId = returnRecord.UserId,
 
 
                 QuantityReturned = returnRecord.QuantityReturned,
@@ -325,17 +328,12 @@ namespace HikeRent.Services.Implementations
             {
                 return null;
             }
-            int userId = int.TryParse(
-                _httpContextAccessor.HttpContext?
-                    .User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id)
-                    ? id
-                    : 0;
             return new ReturnRecordResponse
             {
                 ReturnRecordId = returnRecord.ReturnRecordId,
                 //RentalDetailId = returnRecord.RentalDetailId,
 
-                UserId = userId,
+                UserId = returnRecord.UserId,
 
 
                 QuantityReturned = returnRecord.QuantityReturned,

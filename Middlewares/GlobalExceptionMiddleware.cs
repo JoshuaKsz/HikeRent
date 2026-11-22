@@ -50,7 +50,7 @@ namespace HikeRent.Middlewares
                 await ctx.Response.WriteAsJsonAsync(new
                 {
                     status = "error",
-                    ex.Message
+                    message
                 });
             }
         }

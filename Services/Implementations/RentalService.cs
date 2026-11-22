@@ -1,8 +1,10 @@
+using HikeRent.Exceptions;
 ﻿using HikeRent.DTOs.Rentals;
 using HikeRent.Enums;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
 using HikeRent.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace HikeRent.Services.Implementations
@@ -15,6 +17,7 @@ namespace HikeRent.Services.Implementations
         private readonly IPricingService _pricingService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<RentalService> _logger;
 
         private static readonly TimeZoneInfo JakartaTimeZone =
             TimeZoneInfo.FindSystemTimeZoneById("Asia/Jakarta");
@@ -25,7 +28,8 @@ namespace HikeRent.Services.Implementations
             IGearItemRepository gearItemRepository,
             IPricingService pricingService,
             IUnitOfWork unitOfWork,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<RentalService> logger)
         {
             _rentalRepository = rentalRepository;
             _customerRepository = customerRepository;
@@ -33,6 +37,7 @@ namespace HikeRent.Services.Implementations
             _pricingService = pricingService;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<RentalResponse> CreateAsync(RentalRequest request)
@@ -43,7 +48,7 @@ namespace HikeRent.Services.Implementations
 
             if (!int.TryParse(userIdClaim, out int userId))
             {
-                throw new InvalidOperationException("User ID tidak valid.");
+                throw new BusinessException("User ID tidak valid.");
             }
 
             // Validasi Customer
@@ -59,14 +64,14 @@ namespace HikeRent.Services.Implementations
             // Validasi request
             if (request.Details == null || request.Details.Count == 0)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Minimal harus ada satu peralatan yang disewa.");
             }
 
             if (request.Details.Any(d =>
                 d.GearItemId <= 0 || d.Quantity <= 0))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "GearItemId dan Quantity harus lebih besar dari nol.");
             }
 
@@ -74,7 +79,7 @@ namespace HikeRent.Services.Implementations
                 .GroupBy(d => d.GearItemId)
                 .Any(g => g.Count() > 1))
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Peralatan yang sama tidak boleh dimasukkan lebih dari satu kali.");
             }
 
@@ -122,7 +127,7 @@ namespace HikeRent.Services.Implementations
 
                     if (!gearItem.IsActive)
                     {
-                        throw new InvalidOperationException(
+                        throw new BusinessException(
                             $"GearItem {gearItem.GearName} tidak aktif.");
                     }
 
@@ -131,13 +136,12 @@ namespace HikeRent.Services.Implementations
 
                     int availableStock =
                         gearItem.TotalStock -
-                        gearItem.MaintenanceStock -
                         gearItem.DamagedStock -
                         rentedStock;
 
                     if (availableStock < detail.Quantity)
                     {
-                        throw new InvalidOperationException(
+                        throw new BusinessException(
                             $"Stok {gearItem.GearName} tidak mencukupi. " +
                             $"Stok tersedia: {availableStock}.");
                     }
@@ -200,6 +204,8 @@ namespace HikeRent.Services.Implementations
 
                 await _unitOfWork.CommitTransactionAsync();
                 transactionStarted = false;
+
+                _logger.LogInformation("Rental {RentalCode} dibuat untuk Customer {CustomerId}", rental.RentalCode, rental.CustomerId);
 
                 return new RentalResponse
                 {

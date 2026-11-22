@@ -1,3 +1,4 @@
+using HikeRent.Exceptions;
 using HikeRent.Services.Interfaces;
 
 namespace HikeRent.Services.Implementations
@@ -13,7 +14,7 @@ namespace HikeRent.Services.Implementations
 
             if (plannedReturnDate < plannedStartDate)
             {
-                throw new InvalidOperationException(
+                throw new BusinessException(
                     "Tanggal pengembalian tidak boleh sebelum tanggal mulai sewa.");
             }
 
