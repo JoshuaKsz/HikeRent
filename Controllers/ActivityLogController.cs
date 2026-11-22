@@ -1,9 +1,7 @@
 
-using HikeRent.DTOs.ActivityLog;
 using HikeRent.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace HikeRent.Controllers
 {
@@ -45,31 +43,5 @@ namespace HikeRent.Controllers
             return Ok(activityLog);
         }
 
-        // POST: api/activitylog
-        [HttpPost]
-        public async Task<IActionResult> Create(
-            [FromBody] ActivityLogRequest request)
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdClaim, out int userId))
-            {
-                return Unauthorized(new
-                {
-                    message = "User ID tidak valid."
-                });
-            }
-
-            var activityLog = await _activityLogService.CreateAsync(
-                request,
-                userId
-            );
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = activityLog.ActivityLogId },
-                activityLog
-            );
-        }
     }
 }

@@ -1,8 +1,8 @@
-﻿
-using HikeRent.DTOs.ActivityLog;
+﻿using HikeRent.DTOs.ActivityLog;
 using HikeRent.Models;
 using HikeRent.Repositories.Interfaces;
 using HikeRent.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace HikeRent.Services.Implementations
 {
@@ -10,13 +10,16 @@ namespace HikeRent.Services.Implementations
     {
         private readonly IActivityLogRepository _activityLogRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ActivityLogService> _logger;
 
         public ActivityLogService(
             IActivityLogRepository activityLogRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILogger<ActivityLogService> logger)
         {
             _activityLogRepository = activityLogRepository;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<ActivityLogResponse>> GetAllAsync()
@@ -67,6 +70,8 @@ namespace HikeRent.Services.Implementations
             await _activityLogRepository.AddAsync(activityLog);
 
             await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Staff {UserId} melakukan aktivitas: {Activity}", userId, request.Activity);
 
             ActivityLog? savedActivityLog =
                 await _activityLogRepository.GetByIdWithUserAsync(

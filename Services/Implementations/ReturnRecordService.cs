@@ -19,6 +19,7 @@ namespace HikeRent.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<ReturnRecordService> _logger;
+        private readonly IActivityLogService _activityLogService;
 
         private static readonly TimeZoneInfo JakartaTimeZone =
             TimeZoneInfo.FindSystemTimeZoneById("Asia/Jakarta");
@@ -29,7 +30,8 @@ namespace HikeRent.Services.Implementations
             IGearItemRepository gearItemRepository,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<ReturnRecordService> logger)
+            ILogger<ReturnRecordService> logger,
+            IActivityLogService activityLogService)
         {
             _returnRecordRepository = returnRecordRepository;
             _rentalRepository = rentalRepository;
@@ -37,6 +39,7 @@ namespace HikeRent.Services.Implementations
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _activityLogService = activityLogService;
         }
 
         public async Task<ReturnRecordResponse> CreateAsync(
@@ -255,6 +258,13 @@ namespace HikeRent.Services.Implementations
                 {
                     rental.Status = Enums.RentalStatus.Returned;
                 }
+
+                await _activityLogService.CreateAsync(
+                    new HikeRent.DTOs.ActivityLog.ActivityLogRequest
+                    {
+                        Activity = $"Memproses pengembalian rental {rental.RentalCode} (Detail {rentalDetail.RentalDetailId})"
+                    },
+                    userId);
 
                 // SIMPAN SEMUA PERUBAHAN SEKALI SAJA
                 await _unitOfWork.SaveChangesAsync();

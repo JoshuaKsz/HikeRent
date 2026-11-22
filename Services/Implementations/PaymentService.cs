@@ -16,6 +16,7 @@ namespace HikeRent.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<PaymentService> _logger;
+        private readonly IActivityLogService _activityLogService;
 
         private static readonly TimeZoneInfo JakartaTimeZone =
             TimeZoneInfo.FindSystemTimeZoneById("Asia/Jakarta");
@@ -25,13 +26,15 @@ namespace HikeRent.Services.Implementations
             IRentalRepository rentalRepository,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<PaymentService> logger)
+            ILogger<PaymentService> logger,
+            IActivityLogService activityLogService)
         {
             _paymentRepository = paymentRepository;
             _rentalRepository = rentalRepository;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _activityLogService = activityLogService;
         }
 
         public async Task<IEnumerable<PaymentResponse>> GetAllAsync()
@@ -144,6 +147,13 @@ namespace HikeRent.Services.Implementations
                 // dengan keberadaan data Payment.
                 rental.PaymentStatus = PaymentStatus.Paid;
                 rental.Status = RentalStatus.Completed;
+
+                await _activityLogService.CreateAsync(
+                    new HikeRent.DTOs.ActivityLog.ActivityLogRequest
+                    {
+                        Activity = $"Menerima pembayaran {payment.PaymentCode} untuk rental {rental.RentalCode}"
+                    },
+                    userId);
 
                 await _unitOfWork.SaveChangesAsync();
 
