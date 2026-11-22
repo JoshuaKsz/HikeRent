@@ -12,10 +12,12 @@ namespace HikeRent.Controllers
     public class GearItemController : ControllerBase
     {
         private readonly IGearItemService _gearItemService;
+        private readonly IFileStorageService _fileStorageService;
 
-        public GearItemController(IGearItemService gearItemService)
+        public GearItemController(IGearItemService gearItemService, IFileStorageService fileStorageService)
         {
             _gearItemService = gearItemService;
+            _fileStorageService = fileStorageService;
         }
 
         [HttpGet]
@@ -44,10 +46,16 @@ namespace HikeRent.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(
-            [FromBody] GearItemRequest request)
+            [FromForm] GearItemRequest request,
+            IFormFile? imageFile)
         {
             try
             {
+                if (imageFile != null)
+                {
+                    request.ImageUrl = await _fileStorageService.SaveGearImageAsync(imageFile);
+                }
+
                 GearItemResponse gearItem =
                     await _gearItemService.CreateAsync(request);
 
@@ -68,10 +76,16 @@ namespace HikeRent.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(
             int id,
-            [FromBody] GearItemRequest request)
+            [FromForm] GearItemRequest request,
+            IFormFile? imageFile)
         {
             try
             {
+                if (imageFile != null)
+                {
+                    request.ImageUrl = await _fileStorageService.SaveGearImageAsync(imageFile);
+                }
+
                 GearItemResponse? gearItem =
                     await _gearItemService.UpdateAsync(id, request);
 
@@ -120,6 +134,7 @@ namespace HikeRent.Controllers
                 });
             }
         }
+
     }
 }
 

@@ -151,7 +151,7 @@ namespace HikeRent.Services.Implementations
                 await _activityLogService.CreateAsync(
                     new HikeRent.DTOs.ActivityLog.ActivityLogRequest
                     {
-                        Activity = $"Menerima pembayaran {payment.PaymentCode} untuk rental {rental.RentalCode}"
+                        Activity = $"Menerima pembayaran {payment.PaymentCode} untuk rental {rental.RentalCode} ({payment.PaymentMethod}, Rp{payment.Amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("id-ID"))})"
                     },
                     userId);
 

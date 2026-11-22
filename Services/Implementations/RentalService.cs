@@ -181,7 +181,7 @@ namespace HikeRent.Services.Implementations
                     UserId = userId,
 
                     RentalCode =
-                        $"RNT-{rentalLocalTime:yyyyMMdd}-{Guid.NewGuid():N}",
+                        $"RNT-{rentalLocalTime:yyyyMMdd}-{Guid.NewGuid().ToString("N").Substring(0, 5).ToUpper()}",
 
                     RentalDate = rentalDateUtc,
                     PlannedStartDate = request.PlannedStartDate,
@@ -206,7 +206,7 @@ namespace HikeRent.Services.Implementations
                 await _activityLogService.CreateAsync(
                     new HikeRent.DTOs.ActivityLog.ActivityLogRequest
                     {
-                        Activity = $"Membuat rental {rental.RentalCode} untuk customer {customer.FullName}"
+                        Activity = $"Membuat rental {rental.RentalCode} untuk {customer.FullName} ({rentalDetails.Count} item, total Rp{rental.GrandTotal.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("id-ID"))}, periode {request.PlannedStartDate:dd/MM/yyyy}-{request.PlannedReturnDate:dd/MM/yyyy})"
                     },
                     userId);
 

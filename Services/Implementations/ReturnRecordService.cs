@@ -259,10 +259,11 @@ namespace HikeRent.Services.Implementations
                     rental.Status = Enums.RentalStatus.Returned;
                 }
 
+                var totalFees = lateFee + damageFee + lostItemFee;
                 await _activityLogService.CreateAsync(
                     new HikeRent.DTOs.ActivityLog.ActivityLogRequest
                     {
-                        Activity = $"Memproses pengembalian rental {rental.RentalCode} (Detail {rentalDetail.RentalDetailId})"
+                        Activity = $"Memproses pengembalian {rental.RentalCode} detail #{rentalDetail.RentalDetailId} (baik:{request.QuantityReturned}, rusak:{request.DamagedQuantity}, hilang:{request.LostQuantity}, denda Rp{totalFees.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("id-ID"))}, status:{rental.Status})"
                     },
                     userId);
 
