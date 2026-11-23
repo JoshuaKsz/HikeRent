@@ -3575,3 +3575,76 @@ GROUP BY r."GearItemId"
 2026-11-23 01:09:16 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-11-23 01:09:16 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-5A829 untuk Rizky Ramadhan (3 item, total Rp740.000, periode 23/11/2026-26/11/2026)
 2026-11-23 01:09:16 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-5A829 dibuat untuk Customer 3
+2026-11-23 08:45:47 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-11-23 08:45:47 [WRN] HikeRent.Services.Implementations.AuthService Login gagal: Password salah untuk email staff@gmail.com
+2026-11-23 08:45:49 [WRN] HikeRent.Services.Implementations.AuthService Login gagal: Password salah untuk email staff@gmail.com
+2026-11-23 08:45:54 [INF] HikeRent.Services.Implementations.AuthService User staff@gmail.com berhasil login
+2026-11-23 08:54:29 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-11-23 08:54:29 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-18702 untuk Citra Permata (3 item, total Rp4.320.000, periode 10/11/2026-25/11/2026)
+2026-11-23 08:54:29 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-18702 dibuat untuk Customer 10
+2026-11-23 08:55:10 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-11-23 08:55:10 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-18702 detail #21 (baik:2, rusak:0, hilang:0, denda Rp0, status:Ongoing)
+2026-11-23 08:55:10 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 21 oleh User 1
+2026-11-23 08:55:10 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-18702 detail #22 (baik:0, rusak:1, hilang:1, denda Rp900.000, status:Ongoing)
+2026-11-23 08:55:10 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 22 oleh User 1
+2026-11-23 08:55:10 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-18702 detail #23 (baik:3, rusak:2, hilang:0, denda Rp600.000, status:Returned)
+2026-11-23 08:55:10 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 23 oleh User 1
+2026-11-23 09:11:33 [INF] HikeRent.Services.Implementations.AuthService User staff@gmail.com berhasil login
+2026-11-23 09:12:16 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Menerima pembayaran PAY-20261123-d122443dbe7f42568f32de89867cd8bb untuk rental RNT-20261123-18702 (QRIS, Rp5.820.000)
+2026-11-23 09:12:16 [INF] HikeRent.Services.Implementations.PaymentService Pembayaran PAY-20261123-d122443dbe7f42568f32de89867cd8bb untuk Rental 9 berhasil
+2026-11-23 09:13:01 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261118-005 detail #11 (baik:0, rusak:0, hilang:1, denda Rp1.500.000, status:Ongoing)
+2026-11-23 09:13:01 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 11 oleh User 1
+2026-11-23 09:13:01 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261118-005 detail #12 (baik:0, rusak:1, hilang:0, denda Rp1.100.000, status:Ongoing)
+2026-11-23 09:13:01 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 12 oleh User 1
+2026-11-23 09:13:01 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261118-005 detail #13 (baik:0, rusak:0, hilang:2, denda Rp900.000, status:Returned)
+2026-11-23 09:13:01 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 13 oleh User 1
+2026-11-23 09:19:26 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-CD772 untuk Budi bUdi (3 item, total Rp3.960.000, periode 09/11/2026-26/11/2026)
+2026-11-23 09:19:26 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-CD772 dibuat untuk Customer 11
+2026-11-23 09:20:16 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-CD772 detail #24 (baik:1, rusak:2, hilang:2, denda Rp1.400.000, status:Ongoing)
+2026-11-23 09:20:16 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 24 oleh User 1
+2026-11-23 09:20:16 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-CD772 detail #25 (baik:0, rusak:2, hilang:2, denda Rp1.200.000, status:Ongoing)
+2026-11-23 09:20:16 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 25 oleh User 1
+2026-11-23 09:20:16 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-CD772 detail #26 (baik:1, rusak:0, hilang:1, denda Rp50.000, status:Returned)
+2026-11-23 09:20:16 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 26 oleh User 1
+2026-11-23 09:20:41 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Menerima pembayaran PAY-20261123-92261f904dd94fffa553070b984a2da0 untuk rental RNT-20261123-CD772 (Transfer, Rp6.610.000)
+2026-11-23 09:20:41 [INF] HikeRent.Services.Implementations.PaymentService Pembayaran PAY-20261123-92261f904dd94fffa553070b984a2da0 untuk Rental 10 berhasil
+2026-11-23 09:25:09 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-81E03 untuk Budi bUdi (1 item, total Rp340.000, periode 09/11/2026-25/11/2026)
+2026-11-23 09:25:09 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-81E03 dibuat untuk Customer 11
+2026-11-23 09:28:21 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261122-008 detail #19 (baik:1, rusak:0, hilang:0, denda Rp0, status:Ongoing)
+2026-11-23 09:28:21 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 19 oleh User 1
+2026-11-23 09:28:21 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261122-008 detail #20 (baik:1, rusak:0, hilang:0, denda Rp0, status:Returned)
+2026-11-23 09:28:21 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 20 oleh User 1
+2026-11-23 09:28:52 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Menerima pembayaran PAY-20261123-216b9588454343f5868b0b1bf90ac93f untuk rental RNT-20261122-008 (Cash, Rp240.000)
+2026-11-23 09:28:52 [INF] HikeRent.Services.Implementations.PaymentService Pembayaran PAY-20261123-216b9588454343f5868b0b1bf90ac93f untuk Rental 8 berhasil
+2026-11-23 09:40:37 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-8207A untuk Fajar Nugraha (2 item, total Rp1.560.000, periode 17/11/2026-22/11/2026)
+2026-11-23 09:40:37 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-8207A dibuat untuk Customer 5
+2026-11-23 09:41:56 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-8207A detail #28 (baik:1, rusak:0, hilang:0, denda Rp30.000, status:Ongoing)
+2026-11-23 09:41:56 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 28 oleh User 1
+2026-11-23 09:41:56 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-8207A detail #29 (baik:7, rusak:0, hilang:0, denda Rp126.000, status:Returned)
+2026-11-23 09:41:56 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 29 oleh User 1
+2026-11-23 09:45:13 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-4B4C6 untuk Budi bUdi (1 item, total Rp320.000, periode 06/11/2026-09/11/2026)
+2026-11-23 09:45:13 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-4B4C6 dibuat untuk Customer 11
+2026-11-23 09:45:45 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-4B4C6 detail #30 (baik:1, rusak:0, hilang:0, denda Rp960.000, status:Returned)
+2026-11-23 09:45:45 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 30 oleh User 1
+2026-11-23 09:50:53 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-11-23 09:51:53 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-11-23 09:51:54 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-120BE untuk Citra Permata (1 item, total Rp120.000, periode 01/11/2026-03/11/2026)
+2026-11-23 09:51:54 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-120BE dibuat untuk Customer 10
+2026-11-23 09:52:11 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-11-23 09:52:12 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-120BE detail #31 (baik:1, rusak:0, hilang:0, denda Rp220.000, status:Returned)
+2026-11-23 09:52:12 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 31 oleh User 1
+2026-11-23 09:56:11 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-E0D4F untuk Ahmad Fauzi (1 item, total Rp200.000, periode 01/11/2026-04/11/2026)
+2026-11-23 09:56:11 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-E0D4F dibuat untuk Customer 1
+2026-11-23 09:56:32 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-E0D4F detail #32 (baik:1, rusak:0, hilang:0, denda Rp275.000, status:Returned)
+2026-11-23 09:56:32 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 32 oleh User 1
+2026-11-23 10:07:28 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-B00DD untuk Dimas Saputra (1 item, total Rp200.000, periode 01/11/2026-04/11/2026)
+2026-11-23 10:07:28 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-B00DD dibuat untuk Customer 7
+2026-11-23 10:08:54 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-B00DD detail #33 (baik:1, rusak:0, hilang:0, denda Rp275.000, status:Returned)
+2026-11-23 10:08:54 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 33 oleh User 1
+2026-11-23 10:09:17 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-11-23 10:09:34 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-11-23 10:09:35 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Membuat rental RNT-20261123-3BF41 untuk Budi Santoso (1 item, total Rp200.000, periode 01/11/2026-04/11/2026)
+2026-11-23 10:09:35 [INF] HikeRent.Services.Implementations.RentalService Rental RNT-20261123-3BF41 dibuat untuk Customer 2
+2026-11-23 10:09:51 [WRN] Microsoft.EntityFrameworkCore.Query The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-11-23 10:09:51 [INF] HikeRent.Services.Implementations.ActivityLogService Staff 1 melakukan aktivitas: Memproses pengembalian RNT-20261123-3BF41 detail #34 (baik:1, rusak:0, hilang:0, denda Rp625.000, status:Returned)
+2026-11-23 10:09:51 [INF] HikeRent.Services.Implementations.ReturnRecordService ReturnRecord dibuat untuk RentalDetailId 34 oleh User 1

@@ -173,10 +173,17 @@ namespace HikeRent.Services.Implementations
                 // Hari 2 = 20%
                 // Hari 3 = 30%
                 // Hari 4 = 40%
+
+                
                 for (int day = 1; day <= lateDays; day++)
                 {
+                    int rateDay = day;
+                    if (rateDay > 10)
+                    {
+                        rateDay = 10;
+                    }
                     decimal dailyProgressiveRate =
-                        progressiveRatePerDay * day;
+                        progressiveRatePerDay * rateDay ;
 
                     lateFee +=
                         dailyRentalTotal * dailyProgressiveRate;
